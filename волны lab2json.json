@@ -1,0 +1,10 @@
+{
+    "number of waves": 4,
+    "waves": [
+        {"amplitude": 30, "period": 150, "speed": 1.2},
+        {"amplitude": 40, "period": 120, "speed": 1.5},
+        {"amplitude": 25, "period": 180, "speed": 1.1},
+        {"amplitude": 35, "period": 160, "speed": 1.3}
+    ],
+    "poplavok radius": 15
+}
