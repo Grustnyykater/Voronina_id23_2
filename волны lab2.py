@@ -5,68 +5,68 @@ import json
 
 pygame.init()
 
-# настройка окна
-width, height = 800, 600
-window = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Волны")
+# На данном этапе я настраиваю окно
+win_width, win_height = 800, 600
+screen = pygame.display.set_mode((win_width, win_height))
+pygame.display.set_caption("Симуляция волн")
 
-# определение цветов
-background_color = (240, 230, 240)
-wave_color = (0, 250, 0)
-poplavok_color = (240, 120, 240)
+# Выбираю цвета
+bg_color = (240, 230, 240)  # белый
+wave_col = (0, 250, 0)      # зеленый
+float_col = (240, 120, 240)  # фиолетовый
 
-# загрузка начальных данных из JSON
-data_file = "waves.json"
-with open(data_file) as file:
-    data = json.load(file)
+# Загружаю начальные данные из JSON
+json_file = "waves.json"
+with open(json_file) as f:
+    json_data = json.load(f)
 
-# инициализация данных
-num_waves = data["number of waves"]
-wave_parametry = data["waves"]
-poplavok_radius = data["poplavok radius"]
+# Инициализацирую данные
+wave_count = json_data["number of waves"]  # Количество волн
+wave_attributes = json_data["waves"]        # Параметры волн
+float_radius = json_data["poplavok radius"] # Радиус поплавка
 
-# позиции поплавков
-poplavok_positions = [height // (num_waves + 1) * (i + 1) for i in range(num_waves)]
+# Расположение поплавков
+float_positions = [win_height // (wave_count + 1) * (i + 1) for i in range(wave_count)]
 
-# вес поплавка
-poplavok_weights = [random.uniform(0.5, 2.0) for _ in range(num_waves)]  # случайные веса для каждого поплавка
+# Вес поплавков
+float_weights = [random.uniform(0.5, 2.0) for _ in range(wave_count)]  # Случайные веса для каждого поплавка
 
 running = True
 clock = pygame.time.Clock()
 
 while running:
-    # заливка фона
-    window.fill(background_color)
+    # Заливка фона
+    screen.fill(bg_color)
 
-    # обработка выхода
+    # Обработка выхода из программы
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # обновление волн и поплавков
-    time = pygame.time.get_ticks() / 1000  # время в секундах
-    for i, wave in enumerate(wave_parametry):
-        amplitude = wave["amplitude"]
-        period = wave["period"]
-        speed = wave["speed"]
+    # Обновление волн и поплавков
+    elapsed_time = pygame.time.get_ticks() / 1000  # Время в секундах
+    for i, wave in enumerate(wave_attributes):
+        amplitude = wave["amplitude"]  # Амплитуда волны
+        period = wave["period"]         # Период волны
+        speed = wave["speed"]           # Скорость волны
 
-        # отрисовка волны
-        wave_y = poplavok_positions[i]
-        for x in range(width):
-            y = wave_y + amplitude * math.sin(2 * math.pi * (x / period) - speed * time)
-            pygame.draw.circle(window, wave_color, (x, int(y)), 1)
+        # Отрисовка волны
+        wave_y = float_positions[i]  # Вертикальная позиция волны
+        for x in range(win_width):
+            y = wave_y + amplitude * math.sin(2 * math.pi * (x / period) - speed * elapsed_time)
+            pygame.draw.circle(screen, wave_col, (x, int(y)), 1)
 
-        # расчет позиции поплавка с учетом веса
-        poplavok_x = (time * 100) % width
-        wave_effect_y = wave_y + amplitude * math.sin(2 * math.pi * (poplavok_x / period) - speed * time)
+        # Расчет позиции поплавка с учетом веса
+        float_x = (elapsed_time * 100) % win_width  # Положение поплавка по оси X
+        wave_effect_y = wave_y + amplitude * math.sin(2 * math.pi * (float_x / period) - speed * elapsed_time)
 
-        # учитываем вес: чем больше вес, тем меньше колебаний поплавка
-        poplavok_y = wave_effect_y + poplavok_weights[i] * 5  # визуализации эффекта веса
+        # Корректировка позиции поплавка в зависимости от веса: более тяжелые поплавки тонут
+        float_y = wave_effect_y + float_weights[i] * 5  # Визуализация эффекта веса
 
-        # отрисовка поплавка
-        pygame.draw.circle(window, poplavok_color, (int(poplavok_x), int(poplavok_y)), poplavok_radius)
+        # Отрисовка поплавка
+        pygame.draw.circle(screen, float_col, (int(float_x), int(float_y)), float_radius)
 
-    pygame.display.update()
-    clock.tick(150)
+    pygame.display.update()  # Обновление экрана
+    clock.tick(150)          # Ограничение частоты кадров
 
 pygame.quit()
