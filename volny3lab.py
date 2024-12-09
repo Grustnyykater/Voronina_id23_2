@@ -15,6 +15,7 @@ phon_col = (240, 230, 240)
 volna_col = (0, 250, 0)
 poplavok_col = (240, 120, 240)
 knopka_col = (110, 200, 240)
+pause_col = (255, 0, 0)
 
 # загружаю данные с json
 dop_file = "waves.json"
@@ -119,6 +120,10 @@ polzynok_vesa = UI_polzynok(10, 50, 200, 0.5, 2.0, 1.0)
 polzynok_amplituda = UI_polzynok(10, 100, 200, 10, 100, 20)
 polzynok_period = UI_polzynok(10, 150, 200, 50, 300, 100)
 
+# функционал паузы
+paused = False
+font = pygame.font.Font(None, 50)
+
 # основной цикл
 running = True
 clock = pygame.time.Clock()
@@ -130,6 +135,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                paused = not paused
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # проверка клика по поплавку
             for i, volna_y in enumerate(poplavok_positions):
@@ -166,24 +174,30 @@ while running:
     polzynok_amplituda.draw(screen)
     polzynok_period.draw(screen)
 
-    # обновление волн и поплавков
-    past_time = pygame.time.get_ticks() / 1000
-    for i, volna in enumerate(property_voln):
-        amplitude = volna["amplitude"]
-        period = volna["period"]
-        speed = volna["speed"]
+    if not paused:
+        # обновление волн и поплавков
+        past_time = pygame.time.get_ticks() / 1000
+        for i, volna in enumerate(property_voln):
+            amplitude = volna["amplitude"]
+            period = volna["period"]
+            speed = volna["speed"]
 
-        volna_y = poplavok_positions[i]
-        for x in range(shirina):
-            y = volna_y + amplitude * math.sin(2 * math.pi * (x / period) - speed * past_time)
-            pygame.draw.circle(screen, volna_col, (x, int(y)), 1)
+            volna_y = poplavok_positions[i]
+            for x in range(shirina):
+                y = volna_y + amplitude * math.sin(2 * math.pi * (x / period) - speed * past_time)
+                pygame.draw.circle(screen, volna_col, (x, int(y)), 1)
 
-        # учитываю вес для скорости поплавка
-        redact_speed = 100 / poplavok_ves[i]
-        poplavok_x_positions[i] = (past_time * redact_speed) % shirina
-        effect_volna_y = volna_y + amplitude * math.sin(2 * math.pi * (poplavok_x_positions[i] / period) - speed * past_time)
-        poplavok_y = effect_volna_y + poplavok_ves[i] * 5
-        pygame.draw.circle(screen, poplavok_col, (int(poplavok_x_positions[i]), int(poplavok_y)), poplavok_radius)
+            # учитываю вес для скорости поплавка
+            redact_speed = 100 / poplavok_ves[i]
+            poplavok_x_positions[i] = (past_time * redact_speed) % shirina
+            effect_volna_y = volna_y + amplitude * math.sin(2 * math.pi * (poplavok_x_positions[i] / period) - speed * past_time)
+            poplavok_y = effect_volna_y + poplavok_ves[i] * 5
+            pygame.draw.circle(screen, poplavok_col, (int(poplavok_x_positions[i]), int(poplavok_y)), poplavok_radius)
+
+    else:
+        # пауза
+        pause_text = font.render("PAUSED", True, pause_col)
+        screen.blit(pause_text, pause_text.get_rect(center=(shirina // 2, dlina // 2)))
 
     pygame.display.update()
     clock.tick(60)
